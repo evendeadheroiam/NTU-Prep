@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://api.github.com https://gist.githubusercontent.com; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#EEF3F1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D1B1D" media="(prefers-color-scheme: dark)">
+<title>Moving to NTU</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M14 4h36a6 6 0 0 1 6 6v44a6 6 0 0 1-6 6H14a6 6 0 0 1-6-6V18z' fill='%23F0A23B'/%3E%3Ccircle cx='22' cy='18' r='5' fill='%230E5A5F'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#EEF3F1; --surface:#FFFFFF; --surface-2:#F5F8F7; --ink:#14292C; --muted:#56696B; --line:#D3DEDB;
+  --teal:#0E5A5F; --teal-ink:#FFFFFF; --teal-soft:#DCEDEB;
+  --marigold:#F0A23B; --marigold-ink:#2E1C00; --tag-line:rgba(46,28,0,.22);
+  --red:#B42234; --red-soft:#FBE3E5; --amber:#8A5300; --amber-soft:#FFF0D2; --green:#1E6E46; --green-soft:#DDF1E5;
+  --shadow:0 1px 2px rgba(20,41,44,.06), 0 6px 18px rgba(20,41,44,.06);
+  --rounded: ui-rounded, "SF Pro Rounded", "Nunito", "Varela Round", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1B1D; --surface:#152729; --surface-2:#1A2F31; --ink:#E4EEED; --muted:#9BB1B1; --line:#284241;
+    --teal:#62C4BE; --teal-ink:#052628; --teal-soft:#1D3B3C;
+    --marigold:#F2AE52; --marigold-ink:#2A1900; --tag-line:rgba(42,25,0,.25);
+    --red:#FF8892; --red-soft:#3A1F24; --amber:#F3C063; --amber-soft:#3A2F17; --green:#78D6A0; --green-soft:#183326;
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1B1D; --surface:#152729; --surface-2:#1A2F31; --ink:#E4EEED; --muted:#9BB1B1; --line:#284241;
+  --teal:#62C4BE; --teal-ink:#052628; --teal-soft:#1D3B3C;
+  --marigold:#F2AE52; --marigold-ink:#2A1900; --tag-line:rgba(42,25,0,.25);
+  --red:#FF8892; --red-soft:#3A1F24; --amber:#F3C063; --amber-soft:#3A2F17; --green:#78D6A0; --green-soft:#183326;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 var(--sans);-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+[hidden]{display:none!important}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+
+/* Header */
+.top{display:flex;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 0 10px}
+.brand{font:700 19px/1.2 var(--rounded);margin-right:auto;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pill{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:15px;font-weight:600;white-space:nowrap;flex:none}
+.pill .dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex:none}
+.pill[data-s="saved"] .dot{background:var(--green)}
+.pill[data-s="syncing"] .dot{background:var(--teal);animation:pulse 1s ease-in-out infinite}
+.pill[data-s="offline"] .dot{background:var(--amber)}
+.pill[data-s="error"]{border-color:var(--red);color:var(--red)} .pill[data-s="error"] .dot{background:var(--red)}
+@keyframes pulse{50%{opacity:.25}}
+.icon-btn{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:12px;border:0;background:transparent}
+.icon-btn:hover{background:var(--surface)}
+.icon-btn svg{width:24px;height:24px}
+
+/* Luggage tag countdown */
+.tag{position:relative;margin:6px 0 14px;padding:22px 22px 16px 58px;background:var(--marigold);color:var(--marigold-ink);
+  border-radius:0 18px 18px 0;clip-path:polygon(30px 0,100% 0,100% 100%,30px 100%,0 calc(100% - 30px),0 30px)}
+.tag::before{content:"";position:absolute;left:20px;top:50%;width:20px;height:20px;margin-top:-10px;border-radius:50%;background:var(--bg);box-shadow:0 0 0 4px var(--tag-line)}
+.tag::after{content:"";position:absolute;left:46px;top:14px;bottom:14px;border-left:2px dashed var(--tag-line)}
+.tag-label{margin:0;font-weight:600;font-size:16px}
+.tag-big{margin:0;font:800 clamp(64px,21vw,112px)/.95 var(--rounded);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.tag-big small{font-size:.36em;letter-spacing:0;font-weight:700;margin-left:.12em}
+.tag-sub{margin:4px 0 0;font:700 22px/1.2 var(--rounded)}
+.tag-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--tag-line);font-size:15px}
+.tag-foot b{font-weight:700}
+.tag-btn{min-height:44px;padding:0 16px;border-radius:999px;border:2px solid var(--marigold-ink);background:transparent;color:var(--marigold-ink);font-weight:700;font-size:15px}
+
+/* Banner */
+.banner{display:flex;gap:12px;align-items:center;margin:0 0 14px;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:15px}
+.banner p{margin:0;flex:1}
+.banner.err{border-color:var(--red);background:var(--red-soft)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 20px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-weight:650;font-size:17px}
+.btn.primary{background:var(--teal);color:var(--teal-ink);border-color:var(--teal)}
+.btn.danger{color:var(--red);border-color:var(--red);background:transparent}
+.btn.small{min-height:44px;padding:0 14px;font-size:15px;border-radius:12px}
+.btn.block{width:100%}
+
+/* Section heads, progress, chips */
+.view{padding-bottom:calc(170px + env(safe-area-inset-bottom))}
+.vhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:6px 0 10px}
+.vhead h2{margin:0;font:750 24px/1.2 var(--rounded);letter-spacing:-.01em}
+.vhead .count{color:var(--muted);font-size:15px}
+.progress{margin:0 0 12px}
+.bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--green);border-radius:99px;transition:width .4s}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;margin:0 -16px 6px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 15px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:15px;font-weight:600;white-space:nowrap}
+.chip .n{font-size:13px;color:var(--muted);font-weight:700}
+.chip[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:var(--teal-ink)}
+.chip[aria-pressed="true"] .n{color:inherit;opacity:.8}
+.chip.ghost{border-style:dashed;background:transparent}
+
+/* Rows */
+.group-h{margin:16px 2px 6px;font-size:14px;font-weight:700;color:var(--muted)}
+.list{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:stretch;background:var(--surface);border-radius:16px;box-shadow:var(--shadow);border:1px solid transparent;overflow:hidden}
+.row.overdue{border-color:var(--red);box-shadow:inset 5px 0 0 var(--red)}
+.row.today{border-color:var(--amber);box-shadow:inset 5px 0 0 var(--amber)}
+.row.done .row-title{text-decoration:line-through;color:var(--muted)}
+.tick{flex:none;display:grid;place-items:center;width:60px;cursor:pointer}
+.tick input{appearance:none;-webkit-appearance:none;margin:0;width:30px;height:30px;border-radius:9px;border:2.5px solid var(--muted);background:var(--surface);display:grid;place-items:center;cursor:pointer}
+.tick input:checked{background:var(--green);border-color:var(--green)}
+.tick input:checked::after{content:"";width:8px;height:15px;border:solid var(--surface);border-width:0 3.5px 3.5px 0;transform:translateY(-2px) rotate(45deg)}
+.row-main{flex:1;min-width:0;text-align:left;border:0;background:transparent;padding:13px 14px 13px 0;display:flex;flex-direction:column;gap:3px}
+.row-main.pad{padding-left:16px}
+.row-title{font-weight:650;font-size:17px;overflow-wrap:anywhere}
+.qty{font-weight:600;color:var(--muted);margin-left:4px}
+.row-notes{font-size:15px;color:var(--ink);opacity:.85;white-space:pre-wrap;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.row-meta{font-size:13px;color:var(--muted)}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:13px;font-weight:700;background:var(--surface-2);color:var(--muted)}
+.badge.red{background:var(--red-soft);color:var(--red)}
+.badge.amber{background:var(--amber-soft);color:var(--amber)}
+.badge.green{background:var(--green-soft);color:var(--green)}
+.badge.teal{background:var(--teal-soft);color:var(--teal)}
+.answer{font-size:15px;white-space:pre-wrap;overflow-wrap:anywhere}
+.answer.none{color:var(--muted);font-style:italic}
+.links{display:flex;flex-direction:column;gap:2px;padding:0 14px 12px 16px;margin-top:-6px}
+.links a{color:var(--teal);font-size:15px;font-weight:600;overflow-wrap:anywhere;padding:6px 0}
+.qcard{flex-direction:column}
+.empty{padding:28px 18px;text-align:center;color:var(--muted);background:var(--surface);border-radius:16px;border:1px dashed var(--line)}
+details.done-box{margin-top:16px}
+details.done-box>summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:52px;padding:0 16px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);font-weight:700;cursor:pointer}
+details.done-box>summary::-webkit-details-marker{display:none}
+details.done-box>summary::before{content:"";width:9px;height:9px;border:solid var(--muted);border-width:0 2.5px 2.5px 0;transform:rotate(-45deg);transition:transform .2s}
+details.done-box[open]>summary::before{transform:rotate(45deg)}
+details.done-box>.list{margin-top:8px}
+
+/* Bottom tabs + add button */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tabs .wrap{display:grid;grid-template-columns:repeat(3,1fr);padding:0}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:66px;border:0;background:transparent;color:var(--muted);font-size:14px;font-weight:650;position:relative}
+.tab svg{width:26px;height:26px}
+.tab small{font-size:12px;font-weight:600}
+.tab[aria-selected="true"]{color:var(--teal)}
+.tab[aria-selected="true"]::before{content:"";position:absolute;top:0;left:22%;right:22%;height:3px;border-radius:0 0 3px 3px;background:var(--teal)}
+.fab{position:fixed;z-index:6;right:max(16px,calc(50% - 304px));bottom:calc(82px + env(safe-area-inset-bottom));display:inline-flex;align-items:center;gap:8px;min-height:58px;padding:0 24px 0 20px;border-radius:999px;border:0;background:var(--teal);color:var(--teal-ink);font-weight:750;font-size:17px;box-shadow:0 6px 20px rgba(14,90,95,.35)}
+.fab svg{width:22px;height:22px}
+
+/* Sheet (dialog) */
+dialog.sheet{border:0;padding:0;margin:auto auto 0;width:100%;max-width:560px;max-height:92vh;border-radius:22px 22px 0 0;background:var(--surface);color:var(--ink)}
+dialog.sheet::backdrop{background:rgba(5,20,22,.5)}
+@media (min-width:640px){dialog.sheet{margin:auto;border-radius:22px}}
+.sheet-form{display:flex;flex-direction:column;max-height:92vh}
+.sheet-head{display:flex;align-items:center;gap:8px;padding:16px 16px 6px 20px}
+.sheet-head h2{flex:1;margin:0;font:750 21px/1.25 var(--rounded)}
+.sheet-body{padding:6px 20px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.sheet-actions{display:flex;flex-wrap:wrap;gap:10px;padding:12px 20px calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.sheet-actions .btn{flex:1 1 auto}
+.sheet-actions .btn.primary{flex:2 1 auto}
+.field{display:flex;flex-direction:column;gap:6px}
+.field-label{font-weight:650;font-size:15px}
+.hint{font-size:14px;color:var(--muted)}
+.input,select.input,textarea.input{width:100%;min-height:52px;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface-2);font-size:17px}
+textarea.input{min-height:96px;resize:vertical}
+.input:focus{border-color:var(--teal);outline:none;box-shadow:0 0 0 3px var(--teal-soft)}
+.check-field{display:flex;align-items:center;gap:12px;min-height:52px;font-weight:650}
+.check-field input{width:26px;height:26px;accent-color:var(--green)}
+.seg{display:flex;gap:6px;padding:4px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line)}
+.seg button{flex:1 1 auto;white-space:nowrap;padding:0 10px;min-height:46px;border:0;border-radius:10px;background:transparent;font-weight:650;font-size:16px}
+.seg button[aria-pressed="true"]{background:var(--teal);color:var(--teal-ink)}
+.err-text{color:var(--red);font-weight:600;font-size:15px;margin:0}
+.ok-text{color:var(--green);font-weight:600;font-size:15px;margin:0}
+.box{padding:14px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.box h3{margin:0;font-size:17px}
+.box p{margin:0;font-size:15px}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px}
+.cat-row{display:flex;gap:8px;align-items:center}
+.cat-row .input{flex:1}
+.del-row{display:flex;align-items:center;gap:10px;justify-content:space-between;font-size:15px;padding:6px 0;border-bottom:1px solid var(--line)}
+.del-row:last-child{border-bottom:0}
+.muted{color:var(--muted)}
+
+/* Toast */
+.toast{position:fixed;left:50%;bottom:calc(152px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:14px;max-width:calc(100% - 32px);padding:10px 10px 10px 18px;border-radius:14px;background:var(--ink);color:var(--bg);font-weight:600;font-size:15px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast button{min-height:40px;padding:0 14px;border-radius:10px;border:0;background:var(--marigold);color:var(--marigold-ink);font-weight:750}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Moving to NTU</div>
+    <button class="pill" id="syncPill" type="button" aria-live="polite"><span class="dot"></span><span id="syncText">Not shared</span></button>
+    <button class="icon-btn" id="settingsBtn" type="button" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </header>
+
+  <section class="tag" id="countdown" aria-live="off">
+    <p class="tag-label" id="cdLabel">Leaving for Singapore in</p>
+    <p class="tag-big" id="cdBig">–</p>
+    <p class="tag-sub" id="cdSub" hidden></p>
+    <div class="tag-foot">
+      <span>Flight: <b id="cdDate">–</b><br><span id="cdTz">India time</span></span>
+      <button class="tag-btn" id="editDate" type="button">Change date</button>
+    </div>
+  </section>
+
+  <div id="banner"></div>
+
+  <main id="main">
+    <section class="view" id="view-buy" data-view="buy"></section>
+    <section class="view" id="view-todos" data-view="todos" hidden></section>
+    <section class="view" id="view-questions" data-view="questions" hidden></section>
+  </main>
+</div>
+
+<button class="fab" id="addBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span id="addText">Add item</span></button>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap" role="tablist">
+    <button class="tab" role="tab" data-tab="buy" aria-selected="true" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>
+      Things to buy<small id="tabBuyN"></small></button>
+    <button class="tab" role="tab" data-tab="todos" aria-selected="false" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1.2 1.2L7 5M3.5 12l1.2 1.2L7 11M3.5 18l1.2 1.2L7 17"/></svg>
+      To-do<small id="tabTodoN"></small></button>
+    <button class="tab" role="tab" data-tab="questions" aria-selected="false" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg>
+      Questions<small id="tabQN"></small></button>
+  </div>
+</nav>
+
+<dialog class="sheet" id="sheet"></dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+
+<script>
+'use strict';
+(function(){
+/* ---------- constants & storage ---------- */
+const FILE = 'ntu-prep-data.json';
+const API = 'https://api.github.com';
+const GIST_DESC = 'Data for the "Moving to NTU" prep website. Please do not edit by hand.';
+const COLLS = ['settings','people','categories','buy','todos','questions'];
+const IST = 330 * 60000;
+const POLL_MS = 30000;
+const K = { state:'ntuprep.state', synced:'ntuprep.syncedHash', token:'ntuprep.token', gist:'ntuprep.gistId', login:'ntuprep.login',
+            name:'ntuprep.name', device:'ntuprep.deviceId', theme:'ntuprep.theme', ui:'ntuprep.ui', lastOk:'ntuprep.lastOk', scopes:'ntuprep.extraScopes' };
+const ls = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2, 10)));
+if (!ls.get(K.device)) ls.set(K.device, uid());
+const deviceId = ls.get(K.device);
+const me = () => (ls.get(K.name) || '').trim() || 'Someone';
+const token = () => ls.get(K.token) || '';
+
+/* ---------- data model & merge ---------- */
+function emptyDB(){ const c = {}; COLLS.forEach(k => c[k] = {}); return { app:'ntu-prep', schema:1, collections:c }; }
+function canonStr(v){
+  if (Array.isArray(v)) return '[' + v.map(canonStr).join(',') + ']';
+  if (v && typeof v === 'object') return '{' + Object.keys(v).sort().map(k => JSON.stringify(k) + ':' + canonStr(v[k])).join(',') + '}';
+  return JSON.stringify(v === undefined ? null : v);
+}
+const canon = db => canonStr((db && db.collections) || {});
+function hash(str){ let h1 = 0xdeadbeef, h2 = 0x41c6ce57; for (let i = 0; i < str.length; i++){ const ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909); h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36); }
+const isRec = r => r && typeof r === 'object' && !Array.isArray(r) && typeof r.id === 'string';
+function pick(a, b){
+  if (!isRec(a)) return isRec(b) ? b : undefined;
+  if (!isRec(b)) return a;
+  const ta = +a.updatedAt || 0, tb = +b.updatedAt || 0;
+  if (ta !== tb) return ta > tb ? a : b;
+  return canonStr(a) >= canonStr(b) ? a : b;   // deterministic tie-break so every device converges
+}
+function mergeDB(a, b){
+  const out = emptyDB();
+  const ac = (a && a.collections) || {}, bc = (b && b.collections) || {};
+  const keys = new Set([...COLLS, ...Object.keys(ac), ...Object.keys(bc)]);
+  for (const k of keys){
+    const x = (ac[k] && typeof ac[k] === 'object') ? ac[k] : {}, y = (bc[k] && typeof bc[k] === 'object') ? bc[k] : {};
+    const o = {};
+    for (const id of new Set([...Object.keys(x), ...Object.keys(y)])){ const r = pick(x[id], y[id]); if (r) o[id] = r; }
+    out.collections[k] = o;
+  }
+  return out;
+}
+function seedDB(){
+  const db = emptyDB(), base = { createdAt:0, updatedAt:0, createdBy:'', by:'' };
+  [['clothes','Clothes'],['electronics','Electronics'],['documents','Documents'],['toiletries','Toiletries & medicines'],
+   ['kitchen','Kitchen'],['bedding','Bedding'],['stationery','Stationery'],['other','Other']]
+    .forEach(([k, n], i) => db.collections.categories['cat-' + k] = { ...base, id:'cat-' + k, name:n, order:i + 1 });
+  db.collections.questions['q-sim'] = { ...base, id:'q-sim', question:'What should I do with my Indian SIM after moving to Singapore?', answer:'', links:'', status:'open' };
+  db.collections.questions['q-sbi'] = { ...base, id:'q-sbi', question:'How do I change the phone number linked to my SBI Visa Elite credit card?', answer:'', links:'', status:'open' };
+  db.collections.settings.departure = { ...base, id:'departure', date:'2027-01-08', time:'' };
+  return db;
+}
+let db = (() => { let stored = null; try { stored = JSON.parse(ls.get(K.state) || 'null'); } catch(e){} return mergeDB(seedDB(), stored); })();
+function persist(){ ls.set(K.state, JSON.stringify(db)); }
+persist();
+
+function stamp(prev){ return Math.max(Date.now(), ((prev && +prev.updatedAt) || 0) + 1); }
+function upsert(coll, id, fields){
+  const prev = db.collections[coll][id];
+  const now = stamp(prev);
+  const rec = Object.assign({}, prev || { id, createdAt:now, createdBy:me() }, fields, { id, updatedAt:now, by:me() });
+  db.collections[coll][id] = rec;
+  changed();
+  return rec;
+}
+const live = coll => Object.values(db.collections[coll] || {}).filter(r => isRec(r) && !r.deleted);
+const catsSorted = () => live('categories').sort((a, b) => ((a.order || 0) - (b.order || 0)) || String(a.name).localeCompare(String(b.name)));
+function people(){
+  const set = new Map();
+  const add = n => { n = String(n || '').trim(); if (n && n !== 'Someone' && !set.has(n.toLowerCase())) set.set(n.toLowerCase(), n); };
+  add(ls.get(K.name)); live('people').forEach(p => add(p.name)); live('todos').forEach(t => add(t.assignee));
+  return [...set.values()].sort((a, b) => a.localeCompare(b));
+}
+
+/* ---------- UI state ---------- */
+let ui = Object.assign({ tab:'buy', buyCat:'all', todoWho:'all', qFilter:'open', open:{} }, (() => { try { return JSON.parse(ls.get(K.ui) || '{}'); } catch(e){ return {}; } })());
+const saveUI = () => ls.set(K.ui, JSON.stringify(ui));
+
+/* ---------- dates (India time) ---------- */
+const istNow = () => new Date(Date.now() + IST);
+const istToday = () => istNow().toISOString().slice(0, 10);
+const fmtDate = (iso, withYear = true) => { try { return new Intl.DateTimeFormat('en-GB', { timeZone:'UTC', weekday:'short', day:'numeric', month:'short', year: withYear ? 'numeric' : undefined }).format(new Date(iso + 'T00:00:00Z')); } catch(e){ return iso; } };
+const fmtTime = t => { const [h, m] = t.split(':').map(Number); const ap = h >= 12 ? 'pm' : 'am'; return ((h % 12) || 12) + (m ? ':' + String(m).padStart(2, '0') : '') + ' ' + ap; };
+const dayDiff = (a, b) => Math.round((Date.parse(a + 'T00:00:00Z') - Date.parse(b + 'T00:00:00Z')) / 86400000);
+function ago(ts){
+  const s = (Date.now() - ts) / 1000;
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + ' min ago';
+  if (s < 86400){ const h = Math.floor(s / 3600); return h + (h === 1 ? ' hour ago' : ' hours ago'); }
+  const d = Math.floor(s / 86400);
+  if (d === 1) return 'yesterday';
+  if (d < 7) return d + ' days ago';
+  return 'on ' + fmtDate(new Date(ts + IST).toISOString().slice(0, 10), false);
+}
+function metaLine(r){
+  const a = r.createdBy, b = r.by, when = ago(+r.updatedAt || 0);
+  if (!a && !b) return 'Starter example';
+  if (!a) return 'Changed by ' + b + ' ' + when;
+  if ((+r.updatedAt || 0) - (+r.createdAt || 0) < 1500) return 'Added by ' + a + ', ' + when;
+  if (b && b !== a) return 'Added by ' + a + ', changed by ' + b + ' ' + when;
+  return 'Added by ' + a + ', changed ' + when;
+}
+
+/* ---------- countdown ---------- */
+function departure(){ return db.collections.settings.departure || seedDB().collections.settings.departure; }
+function depMs(d){ const [y, m, dd] = d.date.split('-').map(Number); const [hh, mm] = (d.time || '00:00').split(':').map(Number); return Date.UTC(y, m - 1, dd, hh || 0, mm || 0) - IST; }
+function renderCountdown(){
+  const d = departure(); const ms = depMs(d) - Date.now();
+  $('#cdDate').textContent = fmtDate(d.date) + (d.time ? ', ' + fmtTime(d.time) : '');
+  $('#cdTz').textContent = 'India time';
+  const big = $('#cdBig'), sub = $('#cdSub'), label = $('#cdLabel');
+  sub.hidden = true;
+  if (ms <= 0){
+    label.textContent = 'Departure day has come';
+    big.innerHTML = 'Safe travels!'; big.style.fontSize = 'clamp(40px,12vw,64px)';
+    return;
+  }
+  big.style.fontSize = '';
+  label.textContent = 'Leaving for Singapore in';
+  const days = Math.floor(ms / 86400000), hours = Math.floor((ms % 86400000) / 3600000), mins = Math.floor((ms % 3600000) / 60000);
+  if (days >= 7){ big.innerHTML = days + '<small>days</small>'; }
+  else if (days >= 1){ big.innerHTML = days + '<small>' + (days === 1 ? 'day' : 'days') + '</small>'; sub.hidden = false; sub.textContent = 'and ' + hours + (hours === 1 ? ' hour' : ' hours'); }
+  else { big.innerHTML = hours + '<small>' + (hours === 1 ? 'hour' : 'hours') + '</small>'; sub.hidden = false; sub.textContent = 'and ' + mins + (mins === 1 ? ' minute' : ' minutes'); }
+}
+
+/* ---------- rendering ---------- */
+const tickBox = (coll, r, field, label) => `<label class="tick"><input type="checkbox" data-toggle="${coll}" data-field="${field}" data-id="${esc(r.id)}" ${r[field] ? 'checked' : ''} aria-label="${esc(label)}"></label>`;
+function buyRow(r){
+  const qty = String(r.qty || '').trim();
+  return `<div class="row${r.bought ? ' done' : ''}">${tickBox('buy', r, 'bought', (r.bought ? 'Mark as not bought: ' : 'Mark as bought: ') + r.name)}
+    <button class="row-main" type="button" data-edit="buy" data-id="${esc(r.id)}">
+      <span class="row-title">${esc(r.name)}${qty ? `<span class="qty">× ${esc(qty)}</span>` : ''}</span>
+      ${r.notes ? `<span class="row-notes">${esc(r.notes)}</span>` : ''}
+      <span class="row-meta">${esc(metaLine(r))}</span></button></div>`;
+}
+function renderBuy(){
+  const el = $('#view-buy'), cats = catsSorted(), valid = new Set(cats.map(c => c.id));
+  const items = live('buy'), catOf = i => valid.has(i.categoryId) ? i.categoryId : 'none';
+  const hasNone = items.some(i => catOf(i) === 'none');
+  if (ui.buyCat !== 'all' && !(ui.buyCat === 'none' ? hasNone : valid.has(ui.buyCat))) ui.buyCat = 'all';
+  const shown = items.filter(i => ui.buyCat === 'all' || catOf(i) === ui.buyCat);
+  const left = shown.filter(i => !i.bought).sort((a, b) => (+a.createdAt || 0) - (+b.createdAt || 0));
+  const got = shown.filter(i => i.bought).sort((a, b) => (+b.updatedAt || 0) - (+a.updatedAt || 0));
+  const total = shown.length, pct = total ? Math.round(got.length / total * 100) : 0;
+  const leftIn = id => items.filter(i => !i.bought && (id === 'all' || catOf(i) === id)).length;
+  const chip = (id, name) => `<button class="chip" type="button" data-cat="${esc(id)}" aria-pressed="${ui.buyCat === id}">${esc(name)} <span class="n">${leftIn(id)}</span></button>`;
+  const filterName = ui.buyCat === 'all' ? '' : ui.buyCat === 'none' ? ' with no category' : ' in ' + (cats.find(c => c.id === ui.buyCat) || {}).name;
+  let list = '';
+  if (!left.length){
+    list = `<div class="empty">${total ? 'Everything here is bought. Nice!' : 'Nothing here yet. Tap “Add item” to start the list.'}</div>`;
+  } else if (ui.buyCat === 'all'){
+    const groups = [...cats.map(c => [c.id, c.name]), ['none', 'No category']];
+    for (const [id, name] of groups){ const g = left.filter(i => catOf(i) === id); if (g.length) list += `<h3 class="group-h">${esc(name)}</h3><div class="list">${g.map(buyRow).join('')}</div>`; }
+  } else list = `<div class="list">${left.map(buyRow).join('')}</div>`;
+  el.innerHTML = `<div class="vhead"><h2>Things to buy</h2></div>
+    <div class="progress"><div><strong>${got.length} of ${total}</strong> bought${esc(filterName)}</div><div class="bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div></div>
+    <div class="chips" aria-label="Show category">${chip('all', 'All')}${cats.map(c => chip(c.id, c.name)).join('')}${hasNone ? chip('none', 'No category') : ''}<button class="chip ghost" type="button" data-action="cats">Edit categories</button></div>
+    ${list}
+    ${got.length ? `<details class="done-box" data-open-key="buyDone" ${ui.open.buyDone ? 'open' : ''}><summary>Bought (${got.length})</summary><div class="list">${got.map(buyRow).join('')}</div></details>` : ''}`;
+  $('#tabBuyN').textContent = items.filter(i => !i.bought).length + ' left';
+}
+function dueInfo(t){
+  if (!t.due) return null;
+  const diff = dayDiff(t.due, istToday());
+  if (t.done) return { cls:'', badge:`<span class="badge">Due ${esc(fmtDate(t.due, false))}</span>` };
+  if (diff < 0) return { cls:'overdue', badge:`<span class="badge red">Overdue by ${-diff} ${diff === -1 ? 'day' : 'days'} (${esc(fmtDate(t.due, false))})</span>` };
+  if (diff === 0) return { cls:'today', badge:'<span class="badge amber">Due today</span>' };
+  if (diff === 1) return { cls:'', badge:'<span class="badge">Due tomorrow</span>' };
+  return { cls:'', badge:`<span class="badge">Due ${esc(fmtDate(t.due, false))}</span>` };
+}
+function todoRow(t){
+  const d = dueInfo(t);
+  return `<div class="row ${t.done ? 'done' : (d ? d.cls : '')}">${tickBox('todos', t, 'done', (t.done ? 'Mark as not done: ' : 'Mark as done: ') + t.title)}
+    <button class="row-main" type="button" data-edit="todos" data-id="${esc(t.id)}">
+      <span class="row-title">${esc(t.title)}</span>
+      ${(d || t.assignee) ? `<span class="badges">${d ? d.badge : ''}${t.assignee ? `<span class="badge teal">For ${esc(t.assignee)}</span>` : ''}</span>` : ''}
+      ${t.notes ? `<span class="row-notes">${esc(t.notes)}</span>` : ''}
+      <span class="row-meta">${esc(metaLine(t))}</span></button></div>`;
+}
+const byDue = (a, b) => (a.due && b.due) ? (a.due < b.due ? -1 : a.due > b.due ? 1 : (+a.createdAt || 0) - (+b.createdAt || 0)) : a.due ? -1 : b.due ? 1 : (+a.createdAt || 0) - (+b.createdAt || 0);
+function renderTodos(){
+  const el = $('#view-todos'), all = live('todos'), names = people();
+  if (ui.todoWho !== 'all' && !names.includes(ui.todoWho)) ui.todoWho = 'all';
+  const shown = all.filter(t => ui.todoWho === 'all' || t.assignee === ui.todoWho);
+  const open = shown.filter(t => !t.done).sort(byDue), done = shown.filter(t => t.done).sort((a, b) => (+b.updatedAt || 0) - (+a.updatedAt || 0));
+  const today = istToday(), overdue = open.filter(t => t.due && t.due < today).length, dueToday = open.filter(t => t.due === today).length;
+  const chip = (id, label) => `<button class="chip" type="button" data-who="${esc(id)}" aria-pressed="${ui.todoWho === id}">${esc(label)}</button>`;
+  el.innerHTML = `<div class="vhead"><h2>To-do</h2><span class="count">${open.length} to do${overdue ? `, <b style="color:var(--red)">${overdue} overdue</b>` : ''}${dueToday ? `, <b style="color:var(--amber)">${dueToday} today</b>` : ''}</span></div>
+    ${names.length ? `<div class="chips" aria-label="Show tasks for">${chip('all', 'Everyone')}${names.map(n => chip(n, n)).join('')}</div>` : ''}
+    ${open.length ? `<div class="list">${open.map(todoRow).join('')}</div>` : `<div class="empty">${shown.length ? 'All done here. Well done!' : 'No tasks yet. Tap “Add task” to add one.'}</div>`}
+    ${done.length ? `<details class="done-box" data-open-key="todoDone" ${ui.open.todoDone ? 'open' : ''}><summary>Done (${done.length})</summary><div class="list">${done.map(todoRow).join('')}</div></details>` : ''}`;
+  const n = all.filter(t => !t.done).length;
+  $('#tabTodoN').textContent = n + ' left';
+}
+function safeUrl(u){ u = String(u || '').trim(); if (!/^https?:\/\//i.test(u)) return null; try { const x = new URL(u); return (x.protocol === 'http:' || x.protocol === 'https:') ? x.href : null; } catch(e){ return null; } }
+function linkLabel(u){ try { const x = new URL(u); return x.hostname.replace(/^www\./, '') + (x.pathname.length > 1 ? x.pathname.slice(0, 32) + (x.pathname.length > 32 ? '…' : '') : ''); } catch(e){ return u; } }
+function qCard(q){
+  const links = String(q.links || '').split(/\s*\n\s*/).filter(Boolean);
+  const ans = String(q.answer || '').trim();
+  return `<div class="row qcard"><button class="row-main pad" type="button" data-edit="questions" data-id="${esc(q.id)}">
+      <span class="row-title">${esc(q.question)}</span>
+      <span class="badges">${q.status === 'answered' ? '<span class="badge green">Answered</span>' : '<span class="badge amber">Open</span>'}</span>
+      <span class="answer${ans ? '' : ' none'}">${ans ? esc(ans) : 'No answer yet. Tap to add one.'}</span>
+      <span class="row-meta">${esc(metaLine(q))}</span></button>
+    ${links.length ? `<div class="links">${links.map(l => { const u = safeUrl(l); return u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(linkLabel(u))}</a>` : `<span class="muted">${esc(l)}</span>`; }).join('')}</div>` : ''}</div>`;
+}
+function renderQuestions(){
+  const el = $('#view-questions'), all = live('questions').sort((a, b) => (+b.createdAt || 0) - (+a.createdAt || 0) || String(a.id).localeCompare(String(b.id)));
+  const open = all.filter(q => q.status !== 'answered'), ans = all.filter(q => q.status === 'answered');
+  const list = ui.qFilter === 'open' ? open : ui.qFilter === 'answered' ? ans : all;
+  el.innerHTML = `<div class="vhead"><h2>Questions</h2><span class="count">${open.length} open</span></div>
+    <div class="seg" style="margin-bottom:12px" aria-label="Show questions">
+      <button type="button" data-qf="open" aria-pressed="${ui.qFilter === 'open'}">Open (${open.length})</button>
+      <button type="button" data-qf="answered" aria-pressed="${ui.qFilter === 'answered'}">Answered (${ans.length})</button>
+      <button type="button" data-qf="all" aria-pressed="${ui.qFilter === 'all'}">All</button></div>
+    ${list.length ? `<div class="list">${list.map(qCard).join('')}</div>` : `<div class="empty">${ui.qFilter === 'open' ? 'No open questions.' : ui.qFilter === 'answered' ? 'Nothing answered yet.' : 'No questions yet.'} Tap “Add question” to add one.</div>`}`;
+  $('#tabQN').textContent = open.length + ' open';
+}
+function renderBanner(){
+  const b = $('#banner');
+  if (sync.status === 'error') b.innerHTML = `<div class="banner err"><p>${esc(sync.msg)}</p><button class="btn small" type="button" data-action="connect">Fix</button></div>`;
+  else if (!token()) b.innerHTML = `<div class="banner"><p>Not shared yet. Changes stay on this device until you connect.</p><button class="btn small primary" type="button" data-action="connect">Connect</button></div>`;
+  else b.innerHTML = '';
+}
+function render(){
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === ui.tab)));
+  document.querySelectorAll('.view').forEach(v => v.hidden = v.dataset.view !== ui.tab);
+  $('#addText').textContent = { buy:'Add item', todos:'Add task', questions:'Add question' }[ui.tab];
+  renderCountdown(); renderBuy(); renderTodos(); renderQuestions(); renderBanner();
+}
+
+/* ---------- sheet (dialog) ---------- */
+const sheet = $('#sheet');
+let sheetActions = [];
+function openSheet({ title, body, actions = [], locked = false, onOpen }){
+  sheet.dataset.locked = locked ? '1' : '';
+  sheetActions = actions;
+  sheet.innerHTML = `<form class="sheet-form" novalidate autocomplete="off">
+    <div class="sheet-head"><h2>${esc(title)}</h2>${locked ? '' : '<button type="button" class="icon-btn" data-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>'}</div>
+    <div class="sheet-body">${body}</div>
+    ${actions.length ? `<div class="sheet-actions">${actions.map((a, i) => `<button class="btn ${a.kind || ''}" type="${a.kind === 'primary' ? 'submit' : 'button'}" data-act="${i}">${esc(a.label)}</button>`).join('')}</div>` : ''}</form>`;
+  if (!sheet.open) sheet.showModal();
+  const form = sheet.querySelector('form');
+  if (onOpen) onOpen(form);
+  const first = form.querySelector('[autofocus]');
+  if (first) setTimeout(() => first.focus(), 30);
+  return form;
+}
+function closeSheet(){ if (sheet.open) sheet.close(); sheet.innerHTML = ''; }
+sheet.addEventListener('cancel', e => { if (sheet.dataset.locked) e.preventDefault(); });
+sheet.addEventListener('click', async e => {
+  if (e.target === sheet && !sheet.dataset.locked){ closeSheet(); return; }
+  if (e.target.closest('[data-close]')){ closeSheet(); return; }
+  const b = e.target.closest('[data-act]');
+  if (b && b.type !== 'submit'){ const a = sheetActions[+b.dataset.act]; if (a && a.run && (await a.run(sheet.querySelector('form'))) !== false) closeSheet(); else if (a && !a.run) closeSheet(); }
+});
+sheet.addEventListener('submit', async e => {
+  e.preventDefault();
+  const i = sheetActions.findIndex(a => a.kind === 'primary'); const a = sheetActions[i];
+  if (a && (await a.run(e.target)) !== false) closeSheet();
+});
+const field = (label, inner, hint) => `<label class="field"><span class="field-label">${esc(label)}</span>${inner}${hint ? `<span class="hint">${esc(hint)}</span>` : ''}</label>`;
+const val = (f, n) => String((f.elements[n] && f.elements[n].value) || '').trim();
+const showErr = (f, msg) => { let p = f.querySelector('.err-text'); if (!p){ p = document.createElement('p'); p.className = 'err-text'; p.setAttribute('role', 'alert'); f.querySelector('.sheet-body').appendChild(p); } p.textContent = msg; return false; };
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg, actLabel, act){
+  const t = $('#toast'); clearTimeout(toastTimer);
+  t.innerHTML = `<span>${esc(msg)}</span>${actLabel ? `<button type="button">${esc(actLabel)}</button>` : ''}`;
+  t.hidden = false;
+  if (actLabel) t.querySelector('button').onclick = () => { t.hidden = true; act(); };
+  toastTimer = setTimeout(() => t.hidden = true, actLabel ? 7000 : 2500);
+}
+function removeWithUndo(coll, id, what){
+  upsert(coll, id, { deleted:true });
+  toast(what + ' deleted', 'Undo', () => upsert(coll, id, { deleted:false }));
+}
+
+/* ---------- edit forms ---------- */
+function catOptions(sel){
+  const cats = catsSorted();
+  return `<option value="">No category</option>` + cats.map(c => `<option value="${esc(c.id)}" ${c.id === sel ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+}
+function editBuy(id){
+  const r = id ? db.collections.buy[id] : null;
+  const defCat = r ? r.categoryId : (ui.buyCat !== 'all' && ui.buyCat !== 'none' ? ui.buyCat : '');
+  openSheet({ title: r ? 'Edit item' : 'Add item to buy',
+    body: field('What to buy', `<input class="input" name="name" value="${esc(r ? r.name : '')}" placeholder="e.g. Winter jacket" maxlength="200" ${r ? '' : 'autofocus'}>`)
+      + field('Category', `<select class="input" name="cat">${catOptions(defCat)}</select>`)
+      + field('How many (optional)', `<input class="input" name="qty" value="${esc(r ? r.qty || '' : '')}" placeholder="e.g. 2, or 1 pack" maxlength="40">`)
+      + field('Notes (optional)', `<textarea class="input" name="notes" placeholder="Brand, size, where to buy…" maxlength="2000">${esc(r ? r.notes || '' : '')}</textarea>`)
+      + `<label class="check-field"><input type="checkbox" name="bought" ${r && r.bought ? 'checked' : ''}> Already bought</label>`
+      + (r ? `<p class="row-meta">${esc(metaLine(r))}</p>` : ''),
+    actions: [
+      { label: r ? 'Save changes' : 'Add item', kind:'primary', run: f => {
+        const name = val(f, 'name'); if (!name) return showErr(f, 'Please type what to buy.');
+        upsert('buy', id || uid(), { name, categoryId: val(f, 'cat'), qty: val(f, 'qty'), notes: val(f, 'notes'), bought: f.elements.bought.checked, deleted:false });
+        toast(r ? 'Saved' : 'Item added'); } },
+      ...(r ? [{ label:'Delete', kind:'danger', run: () => removeWithUndo('buy', id, 'Item') }] : []),
+      { label:'Cancel' }
+    ] });
+}
+function editTodo(id){
+  const r = id ? db.collections.todos[id] : null, names = people();
+  if (r && r.assignee && !names.includes(r.assignee)) names.push(r.assignee);
+  openSheet({ title: r ? 'Edit task' : 'Add a task',
+    body: field('Task', `<input class="input" name="title" value="${esc(r ? r.title : '')}" placeholder="e.g. Book flight ticket" maxlength="200" ${r ? '' : 'autofocus'}>`)
+      + field('Due date (optional)', `<input class="input" type="date" name="due" value="${esc(r ? r.due || '' : '')}">`)
+      + field('Who will do it? (optional)', `<select class="input" name="who"><option value="">Anyone</option>${names.map(n => `<option ${r && r.assignee === n ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select>`, names.length < 2 ? 'Names appear here once each person opens the site.' : '')
+      + field('Notes (optional)', `<textarea class="input" name="notes" maxlength="2000">${esc(r ? r.notes || '' : '')}</textarea>`)
+      + `<label class="check-field"><input type="checkbox" name="done" ${r && r.done ? 'checked' : ''}> Done</label>`
+      + (r ? `<p class="row-meta">${esc(metaLine(r))}</p>` : ''),
+    actions: [
+      { label: r ? 'Save changes' : 'Add task', kind:'primary', run: f => {
+        const title = val(f, 'title'); if (!title) return showErr(f, 'Please type the task.');
+        upsert('todos', id || uid(), { title, due: val(f, 'due'), assignee: val(f, 'who'), notes: val(f, 'notes'), done: f.elements.done.checked, deleted:false });
+        toast(r ? 'Saved' : 'Task added'); } },
+      ...(r ? [{ label:'Delete', kind:'danger', run: () => removeWithUndo('todos', id, 'Task') }] : []),
+      { label:'Cancel' }
+    ] });
+}
+function editQuestion(id){
+  const r = id ? db.collections.questions[id] : null;
+  let status = r ? (r.status === 'answered' ? 'answered' : 'open') : 'open', touched = false;
+  openSheet({ title: r ? 'Question' : 'Add a question',
+    body: field('Question', `<textarea class="input" name="question" style="min-height:72px" maxlength="500" ${r ? '' : 'autofocus'}>${esc(r ? r.question : '')}</textarea>`)
+      + field('Answer (anyone can fill this in)', `<textarea class="input" name="answer" maxlength="5000" placeholder="Write what you found out…">${esc(r ? r.answer || '' : '')}</textarea>`)
+      + field('Useful links (optional)', `<textarea class="input" name="links" style="min-height:72px" placeholder="Paste one link per line" maxlength="3000">${esc(r ? r.links || '' : '')}</textarea>`)
+      + `<div class="field"><span class="field-label">Status</span><div class="seg" id="qStatus"><button type="button" data-s="open" aria-pressed="${status === 'open'}">Open</button><button type="button" data-s="answered" aria-pressed="${status === 'answered'}">Answered</button></div></div>`
+      + (r ? `<p class="row-meta">${esc(metaLine(r))}</p>` : ''),
+    onOpen: f => {
+      const setS = s => { status = s; f.querySelectorAll('#qStatus button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.s === s))); };
+      f.querySelector('#qStatus').addEventListener('click', e => { const b = e.target.closest('button'); if (b){ touched = true; setS(b.dataset.s); } });
+      f.elements.answer.addEventListener('input', () => { if (!touched && status === 'open' && !(r && r.answer) && f.elements.answer.value.trim()) setS('answered'); });
+    },
+    actions: [
+      { label: r ? 'Save changes' : 'Add question', kind:'primary', run: f => {
+        const question = val(f, 'question'); if (!question) return showErr(f, 'Please type the question.');
+        upsert('questions', id || uid(), { question, answer: val(f, 'answer'), links: val(f, 'links'), status, deleted:false });
+        toast(r ? 'Saved' : 'Question added'); } },
+      ...(r ? [{ label:'Delete', kind:'danger', run: () => removeWithUndo('questions', id, 'Question') }] : []),
+      { label:'Cancel' }
+    ] });
+}
+function editCategories(){
+  const cats = catsSorted();
+  openSheet({ title:'Edit categories',
+    body: `<p class="hint" style="margin:0">Rename a category by changing its name. Deleting a category keeps its items; they move to “No category”.</p>
+      <div class="list" id="catList">${cats.map(c => `<div class="cat-row"><input class="input" data-cat-id="${esc(c.id)}" value="${esc(c.name)}" maxlength="60" aria-label="Category name"><button class="btn small danger" type="button" data-del-cat="${esc(c.id)}">Delete</button></div>`).join('')}</div>
+      ${field('Add a new category', `<div class="cat-row"><input class="input" name="newCat" placeholder="e.g. Snacks from home" maxlength="60"><button class="btn small" type="button" id="addCat">Add</button></div>`)}`,
+    onOpen: f => {
+      f.querySelector('#addCat').onclick = () => {
+        const n = val(f, 'newCat'); if (!n) return;
+        if (catsSorted().some(c => c.name.toLowerCase() === n.toLowerCase())){ showErr(f, 'That category already exists.'); return; }
+        const order = Math.max(0, ...live('categories').map(c => +c.order || 0)) + 1;
+        upsert('categories', uid(), { name:n, order, deleted:false }); toast('Category added'); editCategories();
+      };
+      f.querySelectorAll('[data-del-cat]').forEach(b => b.onclick = () => {
+        const c = db.collections.categories[b.dataset.delCat], n = live('buy').filter(i => i.categoryId === c.id).length;
+        if (n && !confirm(`Delete “${c.name}”? Its ${n} item${n > 1 ? 's' : ''} will move to “No category”.`)) return;
+        upsert('categories', c.id, { deleted:true }); editCategories();
+        toast('Category deleted', 'Undo', () => upsert('categories', c.id, { deleted:false }));
+      });
+    },
+    actions: [{ label:'Save names', kind:'primary', run: f => {
+      let n = 0;
+      f.querySelectorAll('[data-cat-id]').forEach(inp => { const c = db.collections.categories[inp.dataset.catId], name = inp.value.trim(); if (c && name && name !== c.name){ upsert('categories', c.id, { name }); n++; } });
+      if (val(f, 'newCat')) f.querySelector('#addCat').click();
+      toast(n ? 'Categories saved' : 'No changes'); } }, { label:'Close' }] });
+}
+function editDeparture(){
+  const d = departure();
+  openSheet({ title:'Departure date',
+    body: field('Date', `<input class="input" type="date" name="date" value="${esc(d.date)}" required>`)
+      + field('Flight time (optional)', `<input class="input" type="time" name="time" value="${esc(d.time || '')}">`, 'Use India time. Without a time, the countdown runs to the start of the day.'),
+    actions: [{ label:'Save date', kind:'primary', run: f => {
+      const date = val(f, 'date'); if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return showErr(f, 'Please pick a date.');
+      upsert('settings', 'departure', { date, time: val(f, 'time') }); toast('Departure date saved'); } }, { label:'Cancel' }] });
+}
+
+/* ---------- name, connect, settings ---------- */
+let pendingConnect = null;
+function askName(first){
+  openSheet({ title: first ? 'Welcome! What should we call you?' : 'Your name', locked: !!first,
+    body: field('Your name', `<input class="input" name="name" value="${esc(ls.get(K.name) || '')}" placeholder="e.g. Amma, Appa, Rohith" maxlength="30" autofocus>`, 'This name shows next to things you add or change. It is saved on this device.'),
+    actions: [{ label: first ? 'Continue' : 'Save name', kind:'primary', run: f => {
+      const n = val(f, 'name'); if (!n) return showErr(f, 'Please type your name.');
+      ls.set(K.name, n); upsert('people', deviceId, { name:n, deleted:false });
+      if (pendingConnect){ const t = pendingConnect; pendingConnect = null; setTimeout(() => connect(t), 0); }
+      else if (first && !token()) setTimeout(() => openConnect(), 0);
+    } }, ...(first ? [] : [{ label:'Cancel' }])] });
+}
+function openConnect(){
+  openSheet({ title:'Connect to the shared list',
+    body: `<p style="margin:0">Paste the access code (it starts with <b>ghp_</b>). Rohith can send it to you. You only do this once on each phone or laptop.</p>`
+      + field('Access code', `<input class="input" name="tok" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="ghp_…" autofocus>`)
+      + `<label class="check-field" style="min-height:40px;font-weight:500;font-size:15px"><input type="checkbox" id="showTok"> Show code</label>`,
+    onOpen: f => { f.querySelector('#showTok').onchange = e => f.elements.tok.type = e.target.checked ? 'text' : 'password'; },
+    actions: [{ label:'Connect', kind:'primary', run: async f => {
+      const t = val(f, 'tok').replace(/\s+/g, '');
+      if (!t) return showErr(f, 'Please paste the access code.');
+      const btn = f.querySelector('[type=submit]'); btn.disabled = true; btn.textContent = 'Checking…';
+      const res = await connect(t, true);
+      btn.disabled = false; btn.textContent = 'Connect';
+      if (res !== true) return showErr(f, res);
+    } }, { label:'Not now' }] });
+}
+async function connect(t, fromForm){
+  let res;
+  try { res = await fetch(API + '/user', { cache:'no-store', headers:{ Accept:'application/vnd.github+json', Authorization:'Bearer ' + t } }); }
+  catch(e){ const m = 'Could not reach GitHub. Check the internet connection and try again.'; if (!fromForm) toast(m); return m; }
+  if (res.status === 401){ const m = 'That access code did not work. Check it was copied fully, or ask Rohith for a new one.'; if (!fromForm){ toast(m); openConnect(); } return m; }
+  if (!res.ok){ const m = 'GitHub said no (error ' + res.status + '). Try again in a minute.'; if (!fromForm) toast(m); return m; }
+  const scopes = res.headers.get('x-oauth-scopes');
+  if (scopes != null){
+    const list = scopes.split(',').map(s => s.trim()).filter(Boolean);
+    if (!list.includes('gist')){ const m = 'This access code is missing the “gist” permission. Create a new one with only “gist” ticked.'; if (!fromForm){ toast(m); openConnect(); } return m; }
+    ls.set(K.scopes, list.filter(s => s !== 'gist').join(', '));
+  } else ls.del(K.scopes);
+  let login = ''; try { login = (await res.json()).login || ''; } catch(e){}
+  if (t !== token()) ls.del(K.gist);
+  ls.set(K.token, t); ls.set(K.login, login); ls.del(K.synced);
+  closeSheet(); toast('Connected. Getting the shared list…');
+  setStatus('syncing'); syncNow();
+  return true;
+}
+function disconnect(){
+  if (!confirm('Disconnect this device? Your list stays on this device, but changes will no longer be shared until you connect again.')) return;
+  [K.token, K.gist, K.login, K.synced, K.scopes].forEach(k => ls.del(k));
+  setStatus('local'); render(); openSettings();
+}
+function setupLink(){ return location.origin + location.pathname + '#connect=' + encodeURIComponent(token()); }
+function openSettings(){
+  const connected = !!token(), extra = ls.get(K.scopes), lastOk = +ls.get(K.lastOk) || 0, theme = ls.get(K.theme) || 'auto';
+  const dead = ['categories', 'buy', 'todos', 'questions'].flatMap(c => Object.values(db.collections[c]).filter(r => isRec(r) && r.deleted).map(r => ({ c, r })))
+    .sort((a, b) => (+b.r.updatedAt || 0) - (+a.r.updatedAt || 0)).slice(0, 25);
+  const label = ({ c, r }) => ({ categories:'Category', buy:'Item', todos:'Task', questions:'Question' }[c]) + ': ' + (r.name || r.title || r.question || '');
+  openSheet({ title:'Settings',
+    body: `<div class="box"><h3>Your name</h3><p>Shown as <b>${esc(me())}</b> on things you add or change.</p><div class="btn-row"><button class="btn small" type="button" data-s="name">Change name</button></div></div>
+      <div class="box"><h3>Sharing</h3>
+        ${connected ? `<p class="ok-text">Connected${ls.get(K.login) ? ' to GitHub account ' + esc(ls.get(K.login)) : ''}.</p><p class="muted">${lastOk ? 'Last saved to the shared list ' + esc(ago(lastOk)) + '.' : 'Not saved yet.'}</p>` : '<p>Not connected. Changes stay on this device only.</p>'}
+        ${extra ? `<p class="err-text">This access code has extra permissions (${esc(extra)}). For safety, make a new one with only “gist” ticked.</p>` : ''}
+        <div class="btn-row">${connected ? '<button class="btn small primary" type="button" data-s="sync">Sync now</button><button class="btn small" type="button" data-s="link">Copy setup link for another phone</button><button class="btn small" type="button" data-s="connect">Change access code</button><button class="btn small danger" type="button" data-s="disconnect">Disconnect</button>' : '<button class="btn small primary" type="button" data-s="connect">Connect</button>'}</div>
+        <div id="linkBox" hidden><p class="hint">Anyone with this link can change your list. Send it only to family, and delete the message after they open it.</p><textarea class="input" readonly style="min-height:72px;font-size:14px" id="linkText"></textarea></div></div>
+      <div class="box"><h3>Departure date</h3><p>${esc(fmtDate(departure().date))}${departure().time ? ', ' + esc(fmtTime(departure().time)) : ''} (India time)</p><div class="btn-row"><button class="btn small" type="button" data-s="date">Change date</button></div></div>
+      <div class="box"><h3>Look</h3><div class="seg" id="themeSeg">${['auto', 'light', 'dark'].map(t => `<button type="button" data-theme-set="${t}" aria-pressed="${theme === t}">${{ auto:'Match phone', light:'Light', dark:'Dark' }[t]}</button>`).join('')}</div></div>
+      <div class="box"><h3>Backup</h3><p>Save a copy of everything as a file, or bring a copy back.</p><div class="btn-row"><button class="btn small" type="button" data-s="export">Export backup</button><button class="btn small" type="button" data-s="import">Import backup</button></div></div>
+      <div class="box"><h3>Recently deleted</h3>${dead.length ? dead.map((d, i) => `<div class="del-row"><span>${esc(label(d))}</span><button class="btn small" type="button" data-restore="${i}">Restore</button></div>`).join('') : '<p class="muted">Nothing deleted.</p>'}</div>`,
+    onOpen: f => {
+      f.addEventListener('click', async e => {
+        const s = e.target.closest('[data-s]'), th = e.target.closest('[data-theme-set]'), rs = e.target.closest('[data-restore]');
+        if (th){ setTheme(th.dataset.themeSet); f.querySelectorAll('[data-theme-set]').forEach(b => b.setAttribute('aria-pressed', String(b === th))); }
+        if (rs){ const d = dead[+rs.dataset.restore]; upsert(d.c, d.r.id, { deleted:false }); toast('Restored'); openSettings(); }
+        if (!s) return;
+        const a = s.dataset.s;
+        if (a === 'name') askName(false);
+        else if (a === 'sync'){ await syncNow(); toast(sync.status === 'saved' ? 'All changes saved' : sync.msg || 'Will retry soon'); }
+        else if (a === 'connect') openConnect();
+        else if (a === 'disconnect') disconnect();
+        else if (a === 'date') editDeparture();
+        else if (a === 'export') exportBackup();
+        else if (a === 'import') $('#importFile').click();
+        else if (a === 'link'){
+          const box = f.querySelector('#linkBox'), ta = f.querySelector('#linkText'); ta.value = setupLink(); box.hidden = false;
+          try { await navigator.clipboard.writeText(ta.value); toast('Setup link copied'); } catch(err){ ta.select(); toast('Copy the link from the box'); }
+        }
+      });
+    },
+    actions: [{ label:'Done' }] });
+}
+function setTheme(t){ if (t === 'auto'){ ls.del(K.theme); document.documentElement.removeAttribute('data-theme'); } else { ls.set(K.theme, t); document.documentElement.setAttribute('data-theme', t); } }
+if (ls.get(K.theme)) document.documentElement.setAttribute('data-theme', ls.get(K.theme));
+
+/* ---------- backup ---------- */
+function exportBackup(){
+  const data = Object.assign({}, db, { exportedAt: new Date().toISOString(), exportedBy: me() });
+  const blob = new Blob([JSON.stringify(data, null, 1)], { type:'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ntu-prep-backup-' + istToday() + '.json';
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  toast('Backup saved to your downloads');
+}
+$('#importFile').addEventListener('change', async e => {
+  const file = e.target.files[0]; e.target.value = ''; if (!file) return;
+  let data; try { data = JSON.parse(await file.text()); } catch(err){ toast('That file is not a backup from this site.'); return; }
+  if (!data || typeof data !== 'object' || !data.collections || typeof data.collections !== 'object'){ toast('That file is not a backup from this site.'); return; }
+  const n = Object.values(data.collections).reduce((s, c) => s + (c && typeof c === 'object' ? Object.keys(c).length : 0), 0);
+  openSheet({ title:'Import backup',
+    body: `<p style="margin:0">This backup has ${n} entries${data.exportedAt ? ', saved ' + esc(String(data.exportedAt).slice(0, 10)) : ''}. How should it be added?</p>
+      <div class="box"><h3>Add from backup</h3><p>Brings back anything missing. Newer changes are kept.</p></div>
+      <div class="box"><h3>Restore backup</h3><p>Everything in the backup goes back to how it was then, including deleted things. Anything added after the backup is kept.</p></div>`,
+    actions: [
+      { label:'Add from backup', kind:'primary', run: () => { db = mergeDB(db, data); changed(); toast('Backup added'); } },
+      { label:'Restore backup', run: () => {
+        const now = Date.now(), win = emptyDB();
+        for (const [k, c] of Object.entries(data.collections)){ if (!c || typeof c !== 'object') continue; win.collections[k] = {};
+          for (const [id, r] of Object.entries(c)) if (isRec(r)){ const cur = db.collections[k] && db.collections[k][id]; win.collections[k][id] = Object.assign({}, r, { updatedAt: Math.max(now, ((cur && +cur.updatedAt) || 0) + 1), by: me() }); } }
+        db = mergeDB(db, win); changed(); toast('Backup restored'); } },
+      { label:'Cancel' }] });
+});
+
+/* ---------- sync ---------- */
+const sync = { busy:false, again:false, status:'local', msg:'', retry:null, debounce:null, lastEnd:0 };
+function setStatus(s, msg){
+  sync.status = s; sync.msg = msg || '';
+  const pill = $('#syncPill'); pill.dataset.s = s;
+  $('#syncText').textContent = { local:'Not shared', syncing:'Syncing…', saved:'Saved', offline:'Offline – will retry', error:'Needs attention' }[s];
+  pill.title = msg || '';
+  renderBanner();
+}
+const pending = () => hash(canon(db)) !== ls.get(K.synced);
+function changed(){
+  persist(); render();
+  clearTimeout(sync.debounce);
+  if (token()){ if (sync.status !== 'error') setStatus(navigator.onLine === false ? 'offline' : 'syncing'); sync.debounce = setTimeout(syncNow, 600); }
+}
+async function api(path, method, body){
+  const res = await fetch(API + path, { method: method || 'GET', cache:'no-store',
+    headers: Object.assign({ Accept:'application/vnd.github+json', Authorization:'Bearer ' + token() }, body ? { 'Content-Type':'application/json' } : {}),
+    body: body ? JSON.stringify(body) : undefined });
+  if (!res.ok){ const e = new Error('GitHub error ' + res.status); e.status = res.status; e.rate = res.headers.get('x-ratelimit-remaining') === '0' || res.status === 429; throw e; }
+  return res.status === 204 ? null : res.json();
+}
+async function listOurGists(){
+  const found = [];
+  for (let page = 1; page <= 10; page++){
+    const arr = await api('/gists?per_page=100&page=' + page);
+    if (!Array.isArray(arr)) break;
+    arr.forEach(g => { if (g && g.files && g.files[FILE]) found.push(g); });
+    if (arr.length < 100) break;
+  }
+  return found.sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)) || String(a.id).localeCompare(String(b.id)));
+}
+async function findOrCreateGist(){
+  let list = await listOurGists();
+  if (list.length) return list[0].id;
+  const created = await api('/gists', 'POST', { description: GIST_DESC, public:false, files:{ [FILE]:{ content: serialize(db) } } });
+  list = await listOurGists();   // if two devices created one at the same moment, everyone picks the oldest
+  return list.length ? list[0].id : created.id;
+}
+function serialize(d){ return JSON.stringify({ app:'ntu-prep', schema:1, savedAt:new Date().toISOString(), savedBy:me(), collections:d.collections }, null, 1); }
+async function readGist(id){
+  const g = await api('/gists/' + id);
+  const f = g && g.files && g.files[FILE];
+  if (!f) return { data:null };
+  let text = f.content;
+  if (f.truncated && f.raw_url){ const r = await fetch(f.raw_url, { cache:'no-store' }); if (!r.ok){ const e = new Error('raw ' + r.status); e.status = r.status; throw e; } text = await r.text(); }
+  try { const d = JSON.parse(text); if (!d || typeof d !== 'object' || !d.collections || typeof d.collections !== 'object') throw 0; return { data:d }; }
+  catch(e){ return { data:null, damaged: text || '(empty)' }; }
+}
+async function writeGist(id, data, damaged){
+  const files = { [FILE]:{ content: serialize(data) } };
+  if (damaged != null) files['damaged-copy-' + Date.now() + '.txt'] = { content: damaged };
+  await api('/gists/' + id, 'PATCH', { files });
+}
+async function syncNow(){
+  if (!token()){ setStatus('local'); return; }
+  if (sync.busy){ sync.again = true; return; }
+  sync.busy = true; clearTimeout(sync.retry); clearTimeout(sync.debounce);
+  setStatus('syncing');
+  let rediscovered = false, rounds = 0;
+  try {
+    do {
+      sync.again = false;
+      let gid = ls.get(K.gist);
+      if (!gid){ gid = await findOrCreateGist(); ls.set(K.gist, gid); }
+      let r;
+      try { r = await readGist(gid); }
+      catch(e){ if (e.status === 404 && !rediscovered){ rediscovered = true; ls.del(K.gist); sync.again = true; continue; } throw e; }
+      const remoteCanon = r.data ? canon(r.data) : null;
+      db = mergeDB(db, r.data);           // db already holds any edits made while we waited
+      persist(); render();
+      const snapshot = JSON.parse(JSON.stringify(db)), target = canon(snapshot);
+      if (target !== remoteCanon || r.damaged != null) await writeGist(gid, snapshot, r.damaged);
+      ls.set(K.synced, hash(target));
+      if (pending()) sync.again = true;    // someone edited during the upload
+    } while (sync.again && ++rounds < 6);
+    ls.set(K.lastOk, String(Date.now()));
+    setStatus(pending() ? 'syncing' : 'saved');
+    if (pending()) sync.retry = setTimeout(syncNow, 2000);
+  } catch(e){
+    if (e.status === 401){ setStatus('error', 'The access code stopped working (it may have expired). Tap “Fix” to enter a new one.'); }
+    else if (e.status === 403 && !e.rate){ setStatus('error', 'This access code is not allowed to save the list. Make a new one with the “gist” permission.'); }
+    else if (e.rate){ setStatus('offline', 'GitHub is busy. Will retry in a minute.'); sync.retry = setTimeout(syncNow, 60000); }
+    else { setStatus('offline', navigator.onLine === false ? 'No internet. Your changes are saved on this device.' : 'Could not reach GitHub. Will retry.'); sync.retry = setTimeout(syncNow, 15000); }
+  } finally { sync.busy = false; sync.lastEnd = Date.now(); render(); }
+}
+function maybeSync(){ if (token() && document.visibilityState === 'visible' && (pending() || Date.now() - sync.lastEnd > 4000)) syncNow(); }
+setInterval(() => { if (document.visibilityState === 'visible') syncNow(); }, POLL_MS);
+setInterval(() => { renderCountdown(); }, 30000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible'){ render(); maybeSync(); } });
+window.addEventListener('focus', maybeSync);
+window.addEventListener('online', () => syncNow());
+window.addEventListener('offline', () => { if (token()) setStatus('offline', 'No internet. Your changes are saved on this device.'); });
+window.addEventListener('storage', e => { if (e.key === K.state && e.newValue){ try { db = mergeDB(db, JSON.parse(e.newValue)); render(); } catch(err){} } });
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const t = e.target;
+  const tab = t.closest('[data-tab]'); if (tab){ ui.tab = tab.dataset.tab; saveUI(); render(); window.scrollTo({ top:0 }); return; }
+  const ed = t.closest('[data-edit]'); if (ed){ ({ buy:editBuy, todos:editTodo, questions:editQuestion })[ed.dataset.edit](ed.dataset.id); return; }
+  const cat = t.closest('[data-cat]'); if (cat){ ui.buyCat = cat.dataset.cat; saveUI(); renderBuy(); return; }
+  const who = t.closest('[data-who]'); if (who){ ui.todoWho = who.dataset.who; saveUI(); renderTodos(); return; }
+  const qf = t.closest('[data-qf]'); if (qf){ ui.qFilter = qf.dataset.qf; saveUI(); renderQuestions(); return; }
+  const act = t.closest('[data-action]'); if (act){ if (act.dataset.action === 'cats') editCategories(); if (act.dataset.action === 'connect') openConnect(); return; }
+});
+document.addEventListener('change', e => {
+  const c = e.target.closest('[data-toggle]');
+  if (c){ const v = c.checked; upsert(c.dataset.toggle, c.dataset.id, { [c.dataset.field]: v });
+    if (v) toast(c.dataset.field === 'bought' ? 'Marked as bought' : 'Marked as done'); }
+});
+document.addEventListener('toggle', e => { const d = e.target; if (d.dataset && d.dataset.openKey){ ui.open[d.dataset.openKey] = d.open; saveUI(); } }, true);
+$('#addBtn').onclick = () => ({ buy:editBuy, todos:editTodo, questions:editQuestion })[ui.tab]();
+$('#editDate').onclick = editDeparture;
+$('#settingsBtn').onclick = openSettings;
+$('#syncPill').onclick = () => { if (!token() || sync.status === 'error') openConnect(); else syncNow(); };
+
+/* ---------- start ---------- */
+const m = location.hash.match(/[#&]connect=([^&]+)/);
+if (m){ try { pendingConnect = decodeURIComponent(m[1]).trim(); } catch(e){} history.replaceState(null, '', location.pathname + location.search); }
+setStatus(token() ? (pending() ? 'syncing' : 'saved') : 'local');
+render();
+if (!ls.get(K.name)) askName(true);
+else {
+  if (!live('people').some(p => p.id === deviceId)) upsert('people', deviceId, { name: ls.get(K.name) });
+  if (pendingConnect){ const t = pendingConnect; pendingConnect = null; connect(t); }
+  else syncNow();
+}
+window.NTU = { mergeDB, syncNow, get db(){ return db; }, get status(){ return sync.status; } };
+})();
+</script>
+</body>
+</html>
