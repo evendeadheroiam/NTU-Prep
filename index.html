@@ -131,6 +131,12 @@ button{cursor:pointer}
 .links{display:flex;flex-direction:column;gap:2px;padding:0 14px 12px 16px;margin-top:-6px}
 .links a{color:var(--teal);font-size:15px;font-weight:600;overflow-wrap:anywhere;padding:6px 0}
 .qcard{flex-direction:column}
+.row.todo{flex-direction:column}
+.row-top{display:flex;align-items:stretch}
+.row.todo .links{padding-left:60px;flex-direction:row;flex-wrap:wrap;gap:6px;margin-top:-4px}
+.row.todo .row-notes{-webkit-line-clamp:2}
+.link-chip{display:inline-flex;align-items:center;max-width:100%;min-height:36px;padding:0 12px;border-radius:99px;background:var(--teal-soft);color:var(--teal);font-size:14px;font-weight:650;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.links a.link-chip{padding:0 12px}
 .empty{padding:28px 18px;text-align:center;color:var(--muted);background:var(--surface);border-radius:16px;border:1px dashed var(--line)}
 details.done-box{margin-top:16px}
 details.done-box>summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:52px;padding:0 16px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);font-weight:700;cursor:pointer}
@@ -423,16 +429,37 @@ function dueInfo(t){
   if (diff === 1) return { cls:'', badge:'<span class="badge">Due tomorrow</span>' };
   return { cls:'', badge:`<span class="badge">Due ${esc(fmtDate(t.due, false))}</span>` };
 }
+function shortLabel(u){ try { const x = new URL(u); const seg = x.pathname.split('/').filter(Boolean).pop() || ''; let s = decodeURIComponent(seg).replace(/\.[a-z]+$/i, '').replace(/[-_]+/g, ' ').replace(/\(.*?\)/g, '').trim(); if (s.length > 22) s = s.slice(0, 21) + '…'; return x.hostname.replace(/^www\./, '') + (s ? ': ' + s : ''); } catch(e){ return u; } }
+function linksHtml(text, compact){
+  const links = String(text || '').split(/\s*\n\s*/).filter(Boolean);
+  if (!links.length) return '';
+  return `<div class="links">${links.map(l => { const u = safeUrl(l); return u ? `<a ${compact ? 'class="link-chip" ' : ''}href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(compact ? shortLabel(u) : linkLabel(u))}</a>` : (compact ? '' : `<span class="muted">${esc(l)}</span>`); }).join('')}</div>`;
+}
 function todoRow(t){
   const d = dueInfo(t);
-  return `<div class="row ${t.done ? 'done' : (d ? d.cls : '')}">${tickBox('todos', t, 'done', (t.done ? 'Mark as not done: ' : 'Mark as done: ') + t.title)}
+  return `<div class="row todo ${t.done ? 'done' : (d ? d.cls : '')}"><div class="row-top">${tickBox('todos', t, 'done', (t.done ? 'Mark as not done: ' : 'Mark as done: ') + t.title)}
     <button class="row-main" type="button" data-edit="todos" data-id="${esc(t.id)}">
       <span class="row-title">${esc(t.title)}</span>
       ${(d || t.assignee) ? `<span class="badges">${d ? d.badge : ''}${t.assignee ? `<span class="badge teal">For ${esc(t.assignee)}</span>` : ''}</span>` : ''}
       ${t.notes ? `<span class="row-notes">${esc(t.notes)}</span>` : ''}
-      <span class="row-meta">${esc(metaLine(t))}</span></button></div>`;
+      <span class="row-meta">${esc(metaLine(t))}</span></button></div>${linksHtml(t.links, true)}</div>`;
 }
 const byDue = (a, b) => (a.due && b.due) ? (a.due < b.due ? -1 : a.due > b.due ? 1 : (+a.createdAt || 0) - (+b.createdAt || 0)) : a.due ? -1 : b.due ? 1 : (+a.createdAt || 0) - (+b.createdAt || 0);
+const monthName = ym => { try { return new Intl.DateTimeFormat('en-GB', { timeZone:'UTC', month:'long', year:'numeric' }).format(new Date(ym + '-01T00:00:00Z')); } catch(e){ return ym; } };
+function timelineHtml(open, today){
+  const groupOf = t => {
+    if (!t.due) return ['z', 'No date'];
+    const diff = dayDiff(t.due, today);
+    if (diff < 0) return ['0', 'Overdue'];
+    if (diff === 0) return ['1', 'Today'];
+    if (diff <= 6) return ['2', 'Next 7 days'];
+    return ['3' + t.due.slice(0, 7), monthName(t.due.slice(0, 7))];
+  };
+  const groups = [];
+  for (const t of open){ const [k, label] = groupOf(t); let g = groups.find(x => x.k === k); if (!g){ g = { k, label, items:[] }; groups.push(g); } g.items.push(t); }
+  groups.sort((a, b) => a.k < b.k ? -1 : a.k > b.k ? 1 : 0);
+  return groups.map(g => `<h3 class="group-h">${esc(g.label)} <span style="font-weight:600">(${g.items.length})</span></h3><div class="list">${g.items.map(todoRow).join('')}</div>`).join('');
+}
 function renderTodos(){
   const el = $('#view-todos'), all = live('todos'), names = people();
   if (ui.todoWho !== 'all' && !names.includes(ui.todoWho)) ui.todoWho = 'all';
@@ -442,7 +469,7 @@ function renderTodos(){
   const chip = (id, label) => `<button class="chip" type="button" data-who="${esc(id)}" aria-pressed="${ui.todoWho === id}">${esc(label)}</button>`;
   el.innerHTML = `<div class="vhead"><h2>To-do</h2><span class="count">${open.length} to do${overdue ? `, <b style="color:var(--red)">${overdue} overdue</b>` : ''}${dueToday ? `, <b style="color:var(--amber)">${dueToday} today</b>` : ''}</span></div>
     ${names.length ? `<div class="chips" aria-label="Show tasks for">${chip('all', 'Everyone')}${names.map(n => chip(n, n)).join('')}</div>` : ''}
-    ${open.length ? `<div class="list">${open.map(todoRow).join('')}</div>` : `<div class="empty">${shown.length ? 'All done here. Well done!' : 'No tasks yet. Tap “Add task” to add one.'}</div>`}
+    ${open.length ? timelineHtml(open, today) : `<div class="empty">${shown.length ? 'All done here. Well done!' : 'No tasks yet. Tap “Add task” to add one.'}</div>`}
     ${done.length ? `<details class="done-box" data-open-key="todoDone" ${ui.open.todoDone ? 'open' : ''}><summary>Done (${done.length})</summary><div class="list">${done.map(todoRow).join('')}</div></details>` : ''}`;
   const n = all.filter(t => !t.done).length;
   $('#tabTodoN').textContent = n + ' left';
@@ -450,14 +477,13 @@ function renderTodos(){
 function safeUrl(u){ u = String(u || '').trim(); if (!/^https?:\/\//i.test(u)) return null; try { const x = new URL(u); return (x.protocol === 'http:' || x.protocol === 'https:') ? x.href : null; } catch(e){ return null; } }
 function linkLabel(u){ try { const x = new URL(u); return x.hostname.replace(/^www\./, '') + (x.pathname.length > 1 ? x.pathname.slice(0, 32) + (x.pathname.length > 32 ? '…' : '') : ''); } catch(e){ return u; } }
 function qCard(q){
-  const links = String(q.links || '').split(/\s*\n\s*/).filter(Boolean);
   const ans = String(q.answer || '').trim();
   return `<div class="row qcard"><button class="row-main pad" type="button" data-edit="questions" data-id="${esc(q.id)}">
       <span class="row-title">${esc(q.question)}</span>
       <span class="badges">${q.status === 'answered' ? '<span class="badge green">Answered</span>' : '<span class="badge amber">Open</span>'}</span>
       <span class="answer${ans ? '' : ' none'}">${ans ? esc(ans) : 'No answer yet. Tap to add one.'}</span>
       <span class="row-meta">${esc(metaLine(q))}</span></button>
-    ${links.length ? `<div class="links">${links.map(l => { const u = safeUrl(l); return u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(linkLabel(u))}</a>` : `<span class="muted">${esc(l)}</span>`; }).join('')}</div>` : ''}</div>`;
+    ${linksHtml(q.links)}</div>`;
 }
 function renderQuestions(){
   const el = $('#view-questions'), all = live('questions').sort((a, b) => (+b.createdAt || 0) - (+a.createdAt || 0) || String(a.id).localeCompare(String(b.id)));
@@ -497,6 +523,7 @@ function openSheet({ title, body, actions = [], locked = false, onOpen }){
   if (!sheet.open) sheet.showModal();
   const form = sheet.querySelector('form');
   if (onOpen) onOpen(form);
+  form.querySelectorAll('textarea').forEach(ta => { const fit = () => { if (!ta.value) return; ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight + 4, Math.round(window.innerHeight * 0.5)) + 'px'; }; fit(); ta.addEventListener('input', fit); });
   const first = form.querySelector('[autofocus]');
   if (first) setTimeout(() => first.focus(), 30);
   return form;
@@ -563,13 +590,14 @@ function editTodo(id){
     body: field('Task', `<input class="input" name="title" value="${esc(r ? r.title : '')}" placeholder="e.g. Book flight ticket" maxlength="200" ${r ? '' : 'autofocus'}>`)
       + field('Due date (optional)', `<input class="input" type="date" name="due" value="${esc(r ? r.due || '' : '')}">`)
       + field('Who will do it? (optional)', `<select class="input" name="who"><option value="">Anyone</option>${names.map(n => `<option ${r && r.assignee === n ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select>`, names.length < 2 ? 'Names appear here once each person opens the site.' : '')
-      + field('Notes (optional)', `<textarea class="input" name="notes" maxlength="2000">${esc(r ? r.notes || '' : '')}</textarea>`)
+      + field('Notes (optional)', `<textarea class="input" name="notes" maxlength="5000">${esc(r ? r.notes || '' : '')}</textarea>`)
+      + field('Useful links (optional)', `<textarea class="input" name="links" style="min-height:72px" placeholder="Paste one link per line" maxlength="3000">${esc(r ? r.links || '' : '')}</textarea>`)
       + `<label class="check-field"><input type="checkbox" name="done" ${r && r.done ? 'checked' : ''}> Done</label>`
       + (r ? `<p class="row-meta">${esc(metaLine(r))}</p>` : ''),
     actions: [
       { label: r ? 'Save changes' : 'Add task', kind:'primary', run: f => {
         const title = val(f, 'title'); if (!title) return showErr(f, 'Please type the task.');
-        upsert('todos', id || uid(), { title, due: val(f, 'due'), assignee: val(f, 'who'), notes: val(f, 'notes'), done: f.elements.done.checked, deleted:false });
+        upsert('todos', id || uid(), { title, due: val(f, 'due'), assignee: val(f, 'who'), notes: val(f, 'notes'), links: val(f, 'links'), done: f.elements.done.checked, deleted:false });
         toast(r ? 'Saved' : 'Task added'); } },
       ...(r ? [{ label:'Delete', kind:'danger', run: () => removeWithUndo('todos', id, 'Task') }] : []),
       { label:'Cancel' }
